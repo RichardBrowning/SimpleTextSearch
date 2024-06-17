@@ -54,10 +54,13 @@ public class SearchIndexFactory {
                     parsedDocuments.addAll(buildParsedDocuments(partition, parser));
                 }
             });
+            // 线程，添加！
             threads.add(t);
+            // 启动！
             t.start();
         }
 
+        // 线程加入
         for (Thread thread : threads) {
             try {
                 thread.join();
@@ -69,11 +72,13 @@ public class SearchIndexFactory {
         return parsedDocuments;
     }
 
+    // 构建索引
     public static TextSearchIndex buildIndex(Collection<Document> documents) {
-
+        // 并行进行文档解析
         Collection<ParsedDocument> parsedDocuments = buildParsedDocumentsParrallel(documents);
-
+        // 从解析的文档建立语料库
         Corpus corpus = new Corpus(new ArrayList<>(parsedDocuments));
+        // 倒序检索
         InvertedIndex invertedIndex = new InvertedIndex(corpus);
 
         return invertedIndex;
