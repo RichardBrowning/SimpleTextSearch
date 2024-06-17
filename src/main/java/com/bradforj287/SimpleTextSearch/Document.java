@@ -2,10 +2,12 @@ package com.bradforj287.SimpleTextSearch;
 
 /**
  * Created by brad on 6/6/15.
+ * 文档类
  */
 public class Document {
-
+    // Property：原始文本
     private String rawText;
+    // Property：唯一标识符
     private Object uniqueIdentifier;
 
     /**

@@ -13,6 +13,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
  * Created by brad on 6/6/15.
+ * IMPORTANT: 从文本爬取字段列表，对于中文无效，ACTION_REQUIRED: 需要修改为ansj中的ToAnalysis
  */
 public class TextParseUtils {
     Analyzer analyzer = new StandardAnalyzer();
@@ -20,6 +21,7 @@ public class TextParseUtils {
     TextParseUtils() {
     }
 
+    // 入一个词，返还分离的词根/基础形式
     public static String stemWord(String word) {
         EnglishStemmer stemmer = new EnglishStemmer();
         stemmer.setCurrent(word);

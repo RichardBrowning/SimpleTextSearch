@@ -13,28 +13,39 @@ import java.util.concurrent.*;
  * Created by brad on 6/6/15.
  */
 public class InvertedIndex implements TextSearchIndex {
-
+    // 线程池大小
     private static int THREAD_POOL_SIZE = Math.max(1, Runtime.getRuntime().availableProcessors());
-
+    // 语料库
     private Corpus corpus;
+    // 词 -> 文档列表
     private ImmutableMap<String, DocumentPostingCollection> termToPostings;
+    // 文档 -> 文档统计
     private ImmutableMap<ParsedDocument, ParsedDocumentMetrics> docToMetrics;
+    // 
     private ExecutorService executorService;
     private DocumentParser searchTermParser;
 
     public InvertedIndex(Corpus corpus) {
+        // 语料库
         this.corpus = corpus;
+        // 初始化
         init();
+        // 初始化固定线程池（线程数=处理器逻辑核心数）
         executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        // 初始化文档解析器
         searchTermParser = new DocumentParser(false, false);
     }
 
     private void init() {
         // build term -> posting map
         Map<String, DocumentPostingCollection> termToPostingsMap = new HashMap<>();
+        // 遍历语料库中的文档
         for (ParsedDocument document : corpus.getParsedDocuments()) {
+            // 遍历文档中的词
             for (DocumentTerm documentTerm : document.getDocumentTerms()) {
+                // 从documentTerm中获取词
                 final String word = documentTerm.getWord();
+                // 如果termToPostingsMap中不包含该词，则添加
                 if (!termToPostingsMap.containsKey(word)) {
                     termToPostingsMap.put(word, new DocumentPostingCollection(word));
                 }

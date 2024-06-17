@@ -19,15 +19,17 @@ public class StopWordHelper {
     private StopWordHelper() {
 
     }
-
+    /** 
+     * 获取停用词
+     */
     private static HashSet<String> getStopWords() {
-
+        //retVal 哈希集
         HashSet<String> retVal = new HashSet<>();
         //Get file from resources folder
         ClassLoader classLoader = SearchResult.class.getClassLoader();
-
+        // 获取停用词
         File file = new File(classLoader.getResource("stopwords/en.txt").getFile());
-
+        // 读取停用词
         try (Scanner scanner = new Scanner(file)) {
 
             while (scanner.hasNextLine()) {
@@ -52,6 +54,11 @@ public class StopWordHelper {
         return retVal;
     }
 
+    /**
+     * 判断是否是停用词
+     * @param txt
+     * @return
+     */
     public static boolean isStopWord(String txt) {
         if (txt == null || txt.isEmpty()) {
             return true;

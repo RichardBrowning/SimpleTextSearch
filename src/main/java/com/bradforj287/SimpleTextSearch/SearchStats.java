@@ -4,7 +4,7 @@ package com.bradforj287.SimpleTextSearch;
  * Created by brad on 7/11/15.
  */
 public class SearchStats {
-
+    
     private int documentsSearched;
     private long durationNanos;
 
