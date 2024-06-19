@@ -15,14 +15,14 @@ import java.util.Set;
  * 解析后的文档
  */
 public class ParsedDocument {
+    // 唯一标识(文档的)
+    private Object uniqueId;
     // 文档中的词
     private ImmutableList<DocumentTerm> documentTerms;
     // 词频（不可修改）
     private ImmutableMap<String, Integer> wordFrequencyMap;
-    // 唯一词（不可修改）
+    // 唯一词（不可修改）-> LESSON: derivative of documentTerms, in string
     private ImmutableSet<String> uniqueWords;
-    // 唯一标识(文档的)
-    private Object uniqueId;
 
     public ParsedDocument(List<DocumentTerm> documentTerms, Object uniqueId) {
         // 确保文档中的词和唯一标识不为空
