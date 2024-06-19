@@ -16,8 +16,8 @@ public class ParsedDocumentMetrics {
     // 词到发布的映射
     private ImmutableMap<String, DocumentPostingCollection> termsToPostings;
 
-    //metrics
-    // magnitude？
+    // metrics
+    // magnitude这个程度值是对文档中所有词的tfidf值的平方和的根，可理解为对其进行进一步量化
     private Double magnitude;
     // tfidf缓存
     private ImmutableMap<String, Double> tfidfCache;
@@ -51,14 +51,20 @@ public class ParsedDocumentMetrics {
         return retVal;
     }
 
+    // 获取程度值
     public double getMagnitude() {
+        // 如果程度值为空
         if (magnitude == null) {
+            //存储平方和
             double sumOfSquares = 0;
+            //遍历文档中的唯一词
             for (String word : document.getUniqueWords()) {
+                //获取次的词频-逆文档频率值
                 double d = getTfidf(word);
+                //平方和
                 sumOfSquares += d * d;
             }
-
+            //平方和的根是这个程度值
             magnitude = Math.sqrt(sumOfSquares);
         }
 
@@ -75,7 +81,7 @@ public class ParsedDocumentMetrics {
         if (wordFreq == 0) {
             return 0;
         }
-        // TF-IDF = 词频 * 逆文档频率
+        // LESSON: TF-IDF = 词频 * 逆文档频率
         return getInverseDocumentFrequency(word) * document.getWordFrequency(word);
     }
 

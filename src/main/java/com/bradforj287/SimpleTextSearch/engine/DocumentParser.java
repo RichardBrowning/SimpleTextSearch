@@ -31,10 +31,11 @@ public class DocumentParser {
         }
     }
 
+    //inverted indexing
     public ParsedDocument parseDocument(Document doc) {
         // 将文档的原始文本转换为文档术语列表
         List<DocumentTerm> documentTerms = rawTextToTermList(doc.getRawText());
-
+        // 返还解析后的文档
         ParsedDocument document = new ParsedDocument(documentTerms, doc.getUniqueIdentifier());
         return document;
     }

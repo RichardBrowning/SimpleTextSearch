@@ -15,7 +15,6 @@ public class SimpleTextSearchTest {
 
     @Test
     public void testSearchIndex() {
-
         String doc1 = "Shall I compare thee to a summer's day? \n" +
                 "Thou art more lovely and more temperate:\n" +
                 "Rough winds do shake the darling buds of May,\n" +
