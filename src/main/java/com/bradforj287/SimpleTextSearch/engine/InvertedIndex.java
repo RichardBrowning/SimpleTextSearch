@@ -18,7 +18,9 @@ public class InvertedIndex implements TextSearchIndex {
     // 语料库
     private Corpus corpus;
     // 词 -> 文档列表
-    private ImmutableMap<String, DocumentPostingCollection> termToPostings;
+    // private ImmutableMap<String, DocumentPostingCollection> termToPostings;
+    private ImmutableMap<String, Set<ParsedDocument>> termsToParsedDocuments;
+
     // 文档 -> 文档统计
     private ImmutableMap<ParsedDocument, ParsedDocumentMetrics> docToMetrics;
     // 
@@ -37,29 +39,30 @@ public class InvertedIndex implements TextSearchIndex {
     }
 
     private void init() {
-        // build term -> posting map
-        Map<String, DocumentPostingCollection> termToPostingsMap = new HashMap<>();
+        // build term -> set of parsedDocuments
+        Map<String, Set<ParsedDocument>> termToPostingsMap = new HashMap<>();
         // 遍历语料库中的文档
         for (ParsedDocument document : corpus.getParsedDocuments()) {
             // 遍历文档中的词
             for (DocumentTerm documentTerm : document.getDocumentTerms()) {
                 // 从documentTerm中获取词
                 final String word = documentTerm.getWord();
-                // 如果termToPostingsMap中不包含该词，则添加
+                // 如果termToParsedDocument中不包含该词，则添加
                 if (!termToPostingsMap.containsKey(word)) {
-                    termToPostingsMap.put(word, new DocumentPostingCollection(word));
+                    termToPostingsMap.put(word, new HashSet<ParsedDocument>());
                 }
-                termToPostingsMap.get(word).addPosting(documentTerm, document);
+                // 推进现在的文档
+                termToPostingsMap.get(word).add(document);
             }
         }
         //词对应的文档列表，词对文档的映射
-        termToPostings = ImmutableMap.copyOf(termToPostingsMap);
+        this.termsToParsedDocuments = ImmutableMap.copyOf(termToPostingsMap);
 
         //init metrics cache
         Map<ParsedDocument, ParsedDocumentMetrics> metricsMap = new HashMap<>();
         for (ParsedDocument document : corpus.getParsedDocuments()) {
             // 为每个文档建立文档统计
-            metricsMap.put(document, new ParsedDocumentMetrics(corpus, document, termToPostings));
+            metricsMap.put(document, new ParsedDocumentMetrics(corpus, document, this.termsToParsedDocuments));
         }
         docToMetrics = ImmutableMap.copyOf(metricsMap);
     }
@@ -69,7 +72,7 @@ public class InvertedIndex implements TextSearchIndex {
     }
 
     public int termCount() {
-        return termToPostings.keySet().size();
+        return this.termsToParsedDocuments.keySet().size();
     }
 
     private Set<ParsedDocument> getRelevantDocuments(ParsedDocument searchDoc) {
@@ -78,9 +81,9 @@ public class InvertedIndex implements TextSearchIndex {
         // 遍历搜索文档中的词
         for (String word : searchDoc.getUniqueWords()) {
             // 如果词对应的文档列表中包含该词
-            if (termToPostings.containsKey(word)) {
+            if (this.termsToParsedDocuments.containsKey(word)) {
                 // 添加文档列表中的文档
-                retVal.addAll(termToPostings.get(word).getUniqueDocuments());
+                retVal.addAll(this.termsToParsedDocuments.get(word));
             }
         }
 
@@ -105,7 +108,7 @@ public class InvertedIndex implements TextSearchIndex {
         // 将相关文档转换为列表
         List<ParsedDocument> documentsToScan = new ArrayList<>(documentsToScanSet);
         // 用于存储搜索文档的统计
-        final ParsedDocumentMetrics pdm = new ParsedDocumentMetrics(corpus, searchDocument, termToPostings);
+        final ParsedDocumentMetrics pdm = new ParsedDocumentMetrics(corpus, searchDocument, this.termsToParsedDocuments);
         // 用于存储Future,Future是concurrent类中用于储存异步运行结果的类
         List<Future> futures = new ArrayList<>();
         // 根据线程数和文档数分工
@@ -182,11 +185,11 @@ public class InvertedIndex implements TextSearchIndex {
     private double computeCosine(ParsedDocumentMetrics searchDocMetrics, ParsedDocument d2) {
         double cosine = 0;
 
-        Set<String> wordSet = searchDocMetrics.getDocument().getUniqueWords();
+        Set<String> wordSet = searchDocMetrics.getParsedDocument().getUniqueWords();
         ParsedDocument otherDocument = d2;
         if (d2.getUniqueWords().size() < wordSet.size()) {
             wordSet = d2.getUniqueWords();
-            otherDocument = searchDocMetrics.getDocument();
+            otherDocument = searchDocMetrics.getParsedDocument();
         }
         for (String word : wordSet) {
 
@@ -198,7 +201,7 @@ public class InvertedIndex implements TextSearchIndex {
     }
 
 
-    public Map<String, DocumentPostingCollection> getTermToPostings() {
-        return termToPostings;
+    public Map<String, Set<ParsedDocument>> getTermToPostings() {
+        return this.termsToParsedDocuments;
     }
 }

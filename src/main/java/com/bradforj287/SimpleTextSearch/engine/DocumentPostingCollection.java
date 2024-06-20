@@ -9,15 +9,12 @@ import java.util.List;
  * 文档“发布”集
  */
 public class DocumentPostingCollection {
-    // 词
-    private String word;
     // 文档“发布”列表
     private List<DocumentPosting> postings;
     // 被解析后的文档·集
     private HashSet<ParsedDocument> uniqueDocuments;
 
-    public DocumentPostingCollection(String word) {
-        this.word = word;
+    public DocumentPostingCollection() {
         this.postings = new ArrayList<>();
         this.uniqueDocuments = new HashSet<>();
     }
@@ -26,14 +23,6 @@ public class DocumentPostingCollection {
     public void addPosting(DocumentTerm documentTerm, ParsedDocument doc) {
         postings.add(new DocumentPosting(documentTerm, doc));
         uniqueDocuments.add(doc);
-    }
-
-    public String getWord() {
-        return word;
-    }
-
-    public List<DocumentPosting> getPostings() {
-        return postings;
     }
 
     public HashSet<ParsedDocument> getUniqueDocuments() {
