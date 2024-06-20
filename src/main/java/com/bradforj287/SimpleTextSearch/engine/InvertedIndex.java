@@ -67,10 +67,12 @@ public class InvertedIndex implements TextSearchIndex {
         docToMetrics = ImmutableMap.copyOf(metricsMap);
     }
 
+    @Override
     public int numDocuments() {
         return corpus.size();
     }
 
+    @Override
     public int termCount() {
         return this.termsToParsedDocuments.keySet().size();
     }
@@ -118,11 +120,14 @@ public class InvertedIndex implements TextSearchIndex {
                 @Override
                 public void run() {
                     for (ParsedDocument doc : partition) {
+                        // 对于每一个文档，计算和搜索文档的余弦相似度
                         double cosine = computeCosine(pdm, doc);
-
+                        // 建立新搜索结果
                         SearchResult result = new SearchResult();
+                        // 相似度分值
                         result.setRelevanceScore(cosine);
                         result.setUniqueIdentifier(doc.getUniqueId());
+                        // 结果加入结果集
                         resultsP.add(result);
                     }
                 }
@@ -183,18 +188,25 @@ public class InvertedIndex implements TextSearchIndex {
 
     //计算余弦相似度
     private double computeCosine(ParsedDocumentMetrics searchDocMetrics, ParsedDocument d2) {
+        // 储存余弦值
         double cosine = 0;
-
+        // 获取搜索文档的唯一词
         Set<String> wordSet = searchDocMetrics.getParsedDocument().getUniqueWords();
+        // ？多此一举的赋值
         ParsedDocument otherDocument = d2;
+        // 如果搜索文档的唯一次数比被搜索文档还大
         if (d2.getUniqueWords().size() < wordSet.size()) {
+            // 被搜索的文档唯一词赋值给
             wordSet = d2.getUniqueWords();
+            // 搜索文档赋值给otherDocument,仍旧没什么卵用
             otherDocument = searchDocMetrics.getParsedDocument();
         }
+        // 遍历搜索文档的唯一词
         for (String word : wordSet) {
-
+            // 计算余弦值
             double term = ((searchDocMetrics.getTfidf(word)) / searchDocMetrics.getMagnitude()) *
                     ( (docToMetrics.get(d2).getTfidf(word)) / docToMetrics.get(d2).getMagnitude());
+            // 推进余弦值
             cosine = cosine + term;
         }
         return cosine;
